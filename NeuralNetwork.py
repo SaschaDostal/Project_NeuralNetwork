@@ -1,4 +1,5 @@
 import random
+import csv
 
 def main():
     max_epochs = 100
@@ -8,9 +9,17 @@ def main():
     output_layer_size = 1
 
     #nn = create_nn(hidden_layer, hidden_layer_size, input_layer_size, output_layer_size)
-    #nn = train_nn(nn, max_epochs, training_data)
-    plot()
 
+    training_data = readCSV('diabetes_train.csv')
+    #nn = train_nn(nn, max_epochs, training_data)
+    
+    test_data = readCSV('diabetes_test.csv')
+    
+
+    #plot()
+
+# creates a list with a value for every transition between two knots
+# Format: [number of transition][number of left knot][number of right knot]
 def create_nn(hidden_layer, hidden_layer_size, input_layer_size, output_layer_size):
     nn = []
     for transitions in range (hidden_layer + 1):
@@ -117,6 +126,13 @@ def test(x, y):
         return 0
     else:
         return 1
+
+def readCSV(path):
+    data = []
+    with open(path, newline='') as f:
+        reader = csv.reader(f)
+        data.append(list(reader))
+    return data[0][1:]
 
 if __name__ == "__main__":
     main()
