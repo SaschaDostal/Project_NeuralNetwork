@@ -1,5 +1,6 @@
 import random
 import csv
+import math
 
 def main():
     max_epochs = 100
@@ -8,13 +9,12 @@ def main():
     input_layer_size = 2
     output_layer_size = 1
 
-    #nn = create_nn(hidden_layer, hidden_layer_size, input_layer_size, output_layer_size)
+    nn = create_nn(hidden_layer, hidden_layer_size, input_layer_size, output_layer_size)
 
-    training_data = readCSV('diabetes_train.csv')
-    #nn = train_nn(nn, max_epochs, training_data)
+    training_data = readCSV('testdata_train.csv')
+    nn = train_nn(nn, max_epochs, training_data, learning_rate=0.2)
     
-    test_data = readCSV('diabetes_test.csv')
-    
+    #test_data = readCSV('diabetes_test.csv')
 
     #plot()
 
@@ -56,19 +56,33 @@ def train_nn(nn, epochs, training_data, learning_rate):
     random.shuffle(training_data)
 
     for epoch in range(epochs):
-        for sample in range(training_data):
-            initialize_input_layer(sample)
-            forward_pass(nn)
+        for sample in training_data:
+            forward_pass(nn, sample)
             backward_pass()
     return nn
 
-def initialize_input_layer():
-    pass
 
-def forward_pass(nn):
-    for transition in nn:
-        pass
+def forward_pass(nn, sample):
+    output = sample[:-1]
+    for l in range(len(nn)):
+        out =  []
+        for k in range(len(nn[l][0])):
+            input = sum(output, nn[l])
+            out.append(sig(input))
+        output=out
+    print(output)
         
+
+        
+def sum(out, w):
+    sum = 0
+    for j in range(len(out)):
+        for k in range(len(w[j])):
+            sum += float(out[j]) * float(w[j][k])
+    return sum
+
+def sig(x):
+    return 1 / (1 + math.exp(-x))
 
 def backward_pass():
     pass
