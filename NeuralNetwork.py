@@ -19,8 +19,7 @@ class NeuralNetwork:
             print("TRANSITION - " + str(transitions))
 
             if transitions == 0:
-                # '+1' because of the bias in the input layer
-                num_left = input_layer_size + 1
+                num_left = input_layer_size
             else:
                 num_left = hidden_layer_size
 
@@ -53,27 +52,29 @@ class NeuralNetwork:
 
     def forward_pass(self, sample):
         output = sample[:-1]
-        for l in range(len(nn)):
-            out =  []
-            for k in range(len(nn[l][0])):
-                input = sum(output, nn[l])
-                out.append(sig(input))
+        ##print("sample" + str(sample[:-1]))
+        # for each transition
+        for l in range(len(self.weights)):
+            output.append(1.0) # adding bias to output
+            out = []
+            # for each right knot in transition l
+            for k in range(len(self.weights[l][0])):
+                input = self.sum(output, self.weights[l], k)
+                out.append(self.sig(input))
+                ##print("input " + str(input) + " output " + str(self.sig(input)))
+            ##print("OUT" + str(out))
             output=out
-        print(output)
 
-    def sum(out, w):
+    def sum(self, output, w, k):
         sum = 0
-        for j in range(len(out)):
-            for k in range(len(w[j])):
-                sum += float(out[j]) * float(w[j][k])
+        for j in range(len(output)):
+            sum += float(output[j]) * float(w[j][k])
+            ##print("sum += " + str (output[j]) + " * " + str(w[j][k]))
         return sum
 
-    def sig(x):
+    def sig(self, x):
         return 1 / (1 + math.exp(-x))
 
     def backward_pass(self):
         pass
-
-nn = NeuralNetwork(2, 3, 1, 1)
-nn.train()
 
