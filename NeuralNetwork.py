@@ -47,8 +47,8 @@ class NeuralNetwork:
 
         for epoch in range(epochs):
             for sample in training_data:
-                self.forward_pass(sample)
-                self.backward_pass()
+                output = self.forward_pass(sample)
+                self.backward_pass(output, sample)
 
     def forward_pass(self, sample):
         output = sample[:-1]
@@ -59,22 +59,41 @@ class NeuralNetwork:
             out = []
             # for each right knot in transition l
             for k in range(len(self.weights[l][0])):
-                input = self.sum(output, self.weights[l], k)
+                input = self.sum(output, l, k)
                 out.append(self.sig(input))
                 ##print("input " + str(input) + " output " + str(self.sig(input)))
             ##print("OUT" + str(out))
             output=out
+        return output
 
-    def sum(self, output, w, k):
+    def backward_pass(self, output, sample):
+        pass
+        input = 1
+        for k in range(self.output_layer_size):
+            delta = (sample[-1] - output[k]) * self.d_sig(input)
+        # for each knot k in the output layer do
+        # delta[k] = d-sig(in[k])*(y[k]-out[k])
+        # for hidden layer l = L - 1 to 2 do
+        #   for each (not bias) knot j in hidden layer l do
+        #       delta[j] g'(in[j]) * sum(w[j][k] * deta[k])
+        # for each w[j][k] do
+        #   w[j][k] = w[j][k] + alpha * out[j] * delta[k]
+
+    def sum(self, output, l, k):
         sum = 0
         for j in range(len(output)):
-            sum += float(output[j]) * float(w[j][k])
-            ##print("sum += " + str (output[j]) + " * " + str(w[j][k]))
+            sum += float(output[j]) * float(self.weights[l][j][k])
+            ##print("sum += " + str (output[j]) + " * " + str(self.weights[l][j][k]))
         return sum
 
     def sig(self, x):
         return 1 / (1 + math.exp(-x))
 
-    def backward_pass(self):
-        pass
+    def d_sig(self, x):
+        return self.sig(x)*(1.0 - self.sig(x))
 
+    def delta(self, x):
+        return self.d_sig(x)
+
+    def evaluate(self, test_data):
+        pass
