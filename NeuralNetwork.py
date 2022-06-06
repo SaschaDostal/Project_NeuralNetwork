@@ -2,151 +2,78 @@ import random
 import csv
 import math
 
-def main():
-    max_epochs = 100
-    hidden_layer = 4
-    hidden_layer_size = 3
-    input_layer_size = 2
-    output_layer_size = 1
+class NeuralNetwork:
+    def __init__(self, hidden_layers, hidden_layer_size, input_layer_size, output_layer_size):
+        self.hidden_layers = hidden_layers
+        self.hidden_layer_size = hidden_layer_size
+        self.input_layer_size = input_layer_size
+        self.output_layer_size = output_layer_size
+        self.initialize_weights(self.hidden_layers, self.hidden_layer_size, self.input_layer_size, self.output_layer_size)
 
-    nn = create_nn(hidden_layer, hidden_layer_size, input_layer_size, output_layer_size)
+    # creates a list with weights for every transition between two knots
+    # Format: [number of transition][number of left knot][number of right knot]
+    def initialize_weights(self, hidden_layer, hidden_layer_size, input_layer_size, output_layer_size):
+        weights = []
+        for transitions in range (hidden_layer + 1):
+            transition = []
+            print("TRANSITION - " + str(transitions))
 
-    training_data = readCSV('testdata_train.csv')
-    nn = train_nn(nn, max_epochs, training_data, learning_rate=0.2)
-    
-    #test_data = readCSV('diabetes_test.csv')
-
-    #plot()
-
-# creates a list with a value for every transition between two knots
-# Format: [number of transition][number of left knot][number of right knot]
-def create_nn(hidden_layer, hidden_layer_size, input_layer_size, output_layer_size):
-    nn = []
-    for transitions in range (hidden_layer + 1):
-        transition = []
-        print("TRANSITION - " + str(transitions))
-        
-        if transitions == 0:
-            num_left = input_layer_size
-        else:
-            num_left = hidden_layer_size
-        
-        for left_knot in range(num_left):
-            left = []
-            print("    LEFTKNOT - " + str(left_knot))
-
-            if transitions == hidden_layer:
-                num_right = output_layer_size
+            if transitions == 0:
+                # '+1' because of the bias in the input layer
+                num_left = input_layer_size + 1
             else:
-                num_right = hidden_layer_size - 1 # "-1" wegen Bias-Knoten
+                num_left = hidden_layer_size
 
-            for right_knot in range(num_right):
-                random_num = random.random()
-                left.append(random_num)
-                print("        RIGHTKNOT - " + str(right_knot) + " - " + str(random_num))
+            for left_knot in range(num_left):
+                left = []
+                print("    LEFTKNOT - " + str(left_knot))
 
-            transition.append(left)
+                if transitions == hidden_layer:
+                    num_right = output_layer_size
+                else:
+                    num_right = hidden_layer_size - 1 # "-1" wegen Bias-Knoten
 
-        nn.append(transition)
+                for right_knot in range(num_right):
+                    random_num = random.random()
+                    left.append(random_num)
+                    print("        RIGHTKNOT - " + str(right_knot) + " - " + str(random_num))
 
-    return nn
-
-def train_nn(nn, epochs, training_data, learning_rate):
-    
-    random.shuffle(training_data)
-
-    for epoch in range(epochs):
-        for sample in training_data:
-            forward_pass(nn, sample)
-            backward_pass()
-    return nn
-
-
-def forward_pass(nn, sample):
-    output = sample[:-1]
-    for l in range(len(nn)):
-        out =  []
-        for k in range(len(nn[l][0])):
-            input = sum(output, nn[l])
-            out.append(sig(input))
-        output=out
-    print(output)
+                transition.append(left)
+            weights.append(transition)
         
+        self.weights=weights
 
-        
-def sum(out, w):
-    sum = 0
-    for j in range(len(out)):
-        for k in range(len(w[j])):
-            sum += float(out[j]) * float(w[j][k])
-    return sum
+    def train(self, training_data, epochs, learning_rate):
+        random.shuffle(training_data)
 
-def sig(x):
-    return 1 / (1 + math.exp(-x))
+        for epoch in range(epochs):
+            for sample in training_data:
+                self.forward_pass(sample)
+                self.backward_pass()
 
-def backward_pass():
-    pass
+    def forward_pass(self, sample):
+        output = sample[:-1]
+        for l in range(len(nn)):
+            out =  []
+            for k in range(len(nn[l][0])):
+                input = sum(output, nn[l])
+                out.append(sig(input))
+            output=out
+        print(output)
 
-def plot():
-    import matplotlib.pyplot as plt
-    
-    # x-axis values
-    a = [1,2,3,4,5]
-    c = [6,7,8,9,10]
-    # y-axis values
-    b = [2,4,5,7,6]
-    d = [8,9,11,12,12]
+    def sum(out, w):
+        sum = 0
+        for j in range(len(out)):
+            for k in range(len(w[j])):
+                sum += float(out[j]) * float(w[j][k])
+        return sum
 
-    precision = 200
+    def sig(x):
+        return 1 / (1 + math.exp(-x))
 
-    max_x = 10
-    max_y = 12
-    
-    # color area for class 1
-    x_1 = []
-    y_1 = []
-    for x in range(precision):
-        for y in range(precision):
-            if test(x/float(precision) * max_x, y/float(precision) * max_y) == 0:
-                x_1.append(x/float(precision) * max_x)
-                y_1.append(y/float(precision) * max_y)
-    plt.scatter(x_1, y_1, color= "#630700", marker='s', s=50)
+    def backward_pass(self):
+        pass
 
-    # color area for class 2
-    x_2 = []
-    y_2 = []
-    for x in range(precision):
-        for y in range(precision):
-            if test(x/float(precision) * max_x, y/float(precision) * max_y) == 1:
-                x_2.append(x/float(precision) * max_x)
-                y_2.append(y/float(precision) * max_y)
-    plt.scatter(x_2, y_2, color= "#000763", marker='s', s=50)
+nn = NeuralNetwork(2, 3, 1, 1)
+nn.train()
 
-    # draw points for test samples
-    plt.scatter(a, b, label= "Class 1", color= "red", s=10)
-    plt.scatter(c, d, label= "Class 2", color= "blue", s=10)
-    
-    # x-axis label
-    plt.xlabel('x - axis')
-    # y-axis label
-    plt.ylabel('y - axis')
-
-    plt.title('Visualization of test samples')
-    plt.legend()
-    plt.show()
-
-def test(x, y):
-    if x < 7 and y < 7:
-        return 0
-    else:
-        return 1
-
-def readCSV(path):
-    data = []
-    with open(path, newline='') as f:
-        reader = csv.reader(f)
-        data.append(list(reader))
-    return data[0][1:]
-
-if __name__ == "__main__":
-    main()
