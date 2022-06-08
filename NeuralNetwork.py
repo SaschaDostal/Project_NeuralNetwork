@@ -16,7 +16,7 @@ class NeuralNetwork:
         weights = []
         for transitions in range (hidden_layer + 1):
             transition = []
-            print("TRANSITION - " + str(transitions))
+            #print("TRANSITION - " + str(transitions))
 
             if transitions == 0:
                 num_left = input_layer_size
@@ -25,7 +25,7 @@ class NeuralNetwork:
 
             for left_knot in range(num_left):
                 left = []
-                print("    LEFTKNOT - " + str(left_knot))
+                #print("    LEFTKNOT - " + str(left_knot))
 
                 if transitions == hidden_layer:
                     num_right = output_layer_size
@@ -35,7 +35,7 @@ class NeuralNetwork:
                 for right_knot in range(num_right):
                     random_num = random.random()
                     left.append(random_num)
-                    print("        RIGHTKNOT - " + str(right_knot) + " - " + str(random_num))
+                    #print("        RIGHTKNOT - " + str(right_knot) + " - " + str(random_num))
 
                 transition.append(left)
             weights.append(transition)
@@ -48,36 +48,66 @@ class NeuralNetwork:
         for epoch in range(epochs):
             for sample in training_data:
                 output = self.forward_pass(sample)
-                self.backward_pass(output, sample)
+                self.backward_pass(output, sample, learning_rate)
 
     def forward_pass(self, sample):
         output = sample[:-1]
+        self.currentInput = []
+        self.currentOutput = []
         ##print("sample" + str(sample[:-1]))
         # for each transition
         for l in range(len(self.weights)):
             output.append(1.0) # adding bias to output
-            out = []
+            self.currentOutput.append(output)
+            out_ = []
+            in_ = []
+
             # for each right knot in transition l
             for k in range(len(self.weights[l][0])):
                 input = self.sum(output, l, k)
-                out.append(self.sig(input))
+                in_.append(input)
+                out_.append(self.sig(input))
                 ##print("input " + str(input) + " output " + str(self.sig(input)))
             ##print("OUT" + str(out))
-            output=out
+            
+            self.currentInput.append(in_)
+            
+            output=out_
         return output
 
-    def backward_pass(self, output, sample):
-        pass
-        input = 1
-        for k in range(self.output_layer_size):
-            delta = (sample[-1] - output[k]) * self.d_sig(input)
+    def backward_pass(self, output, sample, learning_rate):
+        deltas = []
+
         # for each knot k in the output layer do
         # delta[k] = d-sig(in[k])*(y[k]-out[k])
+        output_deltas = []
+        for k in range(self.output_layer_size):
+            output_deltas.append(self.calc_error(float(sample[k - self.output_layer_size]), output[k]) * self.d_sig(self.currentInput[-1][k]))
+        deltas.append(output_deltas)
+
         # for hidden layer l = L - 1 to 2 do
         #   for each (not bias) knot j in hidden layer l do
-        #       delta[j] g'(in[j]) * sum(w[j][k] * deta[k])
+        #       delta[j] = g'(in[j]) * sum(w[j][k] * delta[k])
+        
+        # [transition][linker knoten][rechter knoten]
+        
+
+        for t in range(self.hidden_layers):
+            hidden_deltas = []
+            for j in range(len(self.weights[-(1 + t)])-1):  # -1 because of bias knot
+                sum = 0.0
+                for k in range(len(self.weights[-(1 + t)][j])):
+                    sum += self.weights[-(1 + t)][j][k] * deltas[0][k]
+                hidden_deltas.append(sum * self.d_sig(self.currentInput[-(2 + t)][j]))
+            deltas.insert(0, hidden_deltas)
+        
         # for each w[j][k] do
         #   w[j][k] = w[j][k] + alpha * out[j] * delta[k]
+
+        for t in range(len(self.weights)):
+            for j in range(len(self.weights[t])-1): # -1 because of bias knot
+                for k in range(len(self.weights[t][j])):
+                    self.weights[t][j][k] = self.weights[t][j][k] + learning_rate * float(self.currentOutput[t][j]) * deltas[t][k]
 
     def sum(self, output, l, k):
         sum = 0
@@ -94,6 +124,10 @@ class NeuralNetwork:
 
     def delta(self, x):
         return self.d_sig(x)
+
+    def calc_error(self, x, y):
+        print("Class:" + str(x) + ", Prediction: " + str(y) + ", Error: " + str(0.5 * (x - y) * (x - y)))
+        return 0.5 * (x - y) * (x - y)
 
     def evaluate(self, test_data):
         pass
