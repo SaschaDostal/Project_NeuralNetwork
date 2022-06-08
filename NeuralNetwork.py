@@ -1,5 +1,4 @@
 import random
-import csv
 import math
 
 class NeuralNetwork:
@@ -43,13 +42,23 @@ class NeuralNetwork:
         self.weights=weights
 
     def train(self, training_data, epochs, learning_rate):
-        random.shuffle(training_data)
-
+        self.predicted_list = []    # for graph
+        self.epoch_list = []       # for graph
         for epoch in range(epochs):
+            random.shuffle(training_data)
+            total = 0
+            true = 0
             for sample in training_data:
                 output = self.forward_pass(sample)
-                #print(output)
+                total+=1
+                if round(output[0]) == int(sample[-1]):
+                    true+=1
                 self.backward_pass(output, sample, learning_rate)
+            self.predicted_list.append(float(true)/total)    # for graph
+            self.epoch_list.append(epoch)        # for graph
+            if epoch == 0 or epoch % 100 == 0:
+                print("Correct Predicted: {:7.4f}".format(float(true)/total) + "%")
+        
 
     def forward_pass(self, sample):
         output = sample[:-1]
@@ -88,16 +97,12 @@ class NeuralNetwork:
         output_deltas = []
         for k in range(self.output_layer_size):
             output_deltas.append((float(sample[k - self.output_layer_size]) - output[k]) * self.d_sig(self.currentInput[-1][k]))
-            print("Class:" + sample[k - self.output_layer_size] + ", Prediction: " + str(output[k]) + ", Diff: " + str(float(sample[k - self.output_layer_size])-output[k]))
+            #print("Class:" + sample[k - self.output_layer_size] + ", Prediction: " + str(output[k]) + ", Diff: " + str(float(sample[k - self.output_layer_size])-output[k]))
         deltas.append(output_deltas)
 
         # for hidden layer l = L - 1 to 2 do
         #   for each (not bias) knot j in hidden layer l do
         #       delta[j] = g'(in[j]) * sum(w[j][k] * delta[k])
-        
-        # [transition][linker knoten][rechter knoten]
-        
-
         for t in range(self.hidden_layers):
             hidden_deltas = []
             for j in range(len(self.weights[-(1 + t)])-1):  # -1 because of bias knot
@@ -109,7 +114,6 @@ class NeuralNetwork:
         
         # for each w[j][k] do
         #   w[j][k] = w[j][k] + alpha * out[j] * delta[k]
-
         for t in range(len(self.weights)):
             for j in range(len(self.weights[t])-1): # -1 because of bias knot
                 for k in range(len(self.weights[t][j])):
@@ -124,5 +128,5 @@ class NeuralNetwork:
     def delta(self, x):
         return self.d_sig(x)
 
-    def evaluate(self, test_data):
-        pass
+    def predict(self, sample):
+        return round(self.forward_pass(sample)[0])

@@ -1,25 +1,25 @@
 import matplotlib.pyplot as plt
 
-def plot():
+def plot_map(nn):
     
     # x-axis values
-    a = [1,2,3,4,5]
-    c = [6,7,8,9,10]
+    a = []
+    c = []
     # y-axis values
-    b = [2,4,5,7,6]
-    d = [8,9,11,12,12]
+    b = []
+    d = []
 
     precision = 200
 
-    max_x = 10
-    max_y = 12
+    max_x = 6
+    max_y = 6
     
     # color area for class 1
     x_1 = []
     y_1 = []
     for x in range(precision):
         for y in range(precision):
-            if test(x/float(precision) * max_x, y/float(precision) * max_y) == 0:
+            if nn.predict([x/float(precision) * max_x, y/float(precision) * max_y, 0]) == 0:
                 x_1.append(x/float(precision) * max_x)
                 y_1.append(y/float(precision) * max_y)
     plt.scatter(x_1, y_1, color= "#630700", marker='s', s=50)
@@ -29,7 +29,7 @@ def plot():
     y_2 = []
     for x in range(precision):
         for y in range(precision):
-            if test(x/float(precision) * max_x, y/float(precision) * max_y) == 1:
+            if nn.predict([x/float(precision) * max_x, y/float(precision) * max_y, 1]) == 1:
                 x_2.append(x/float(precision) * max_x)
                 y_2.append(y/float(precision) * max_y)
     plt.scatter(x_2, y_2, color= "#000763", marker='s', s=50)
@@ -45,6 +45,13 @@ def plot():
 
     plt.title('Visualization of test samples')
     plt.legend()
+    plt.show()
+
+def plot_learning_curve(epochs, percentage):
+    plt.plot(percentage, epochs)
+    plt.xlabel('epochs')
+    plt.ylabel('percentage of correct predicted')
+    plt.title('learning curve')
     plt.show()
 
 def test(x, y):
