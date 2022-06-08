@@ -46,3 +46,9 @@ def plot():
     plt.title('Visualization of test samples')
     plt.legend()
     plt.show()
+
+def test(x, y):
+    if x < 7 and y < 7:
+        return 0
+    else:
+        return 1

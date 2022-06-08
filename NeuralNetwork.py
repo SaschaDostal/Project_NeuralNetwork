@@ -48,13 +48,14 @@ class NeuralNetwork:
         for epoch in range(epochs):
             for sample in training_data:
                 output = self.forward_pass(sample)
+                #print(output)
                 self.backward_pass(output, sample, learning_rate)
 
     def forward_pass(self, sample):
         output = sample[:-1]
         self.currentInput = []
         self.currentOutput = []
-        ##print("sample" + str(sample[:-1]))
+        #print("sample" + str(sample[:-1]))
         # for each transition
         for l in range(len(self.weights)):
             output.append(1.0) # adding bias to output
@@ -64,11 +65,15 @@ class NeuralNetwork:
 
             # for each right knot in transition l
             for k in range(len(self.weights[l][0])):
-                input = self.sum(output, l, k)
+                input  = 0
+                # calculate sum of outputs
+                for j in range(len(output)):
+                    input += float(output[j]) * self.weights[l][j][k]
+                
                 in_.append(input)
                 out_.append(self.sig(input))
-                ##print("input " + str(input) + " output " + str(self.sig(input)))
-            ##print("OUT" + str(out))
+                #print("input " + str(input) + " output " + str(self.sig(input)))
+            #print("OUT" + str(out_))
             
             self.currentInput.append(in_)
             
@@ -82,7 +87,8 @@ class NeuralNetwork:
         # delta[k] = d-sig(in[k])*(y[k]-out[k])
         output_deltas = []
         for k in range(self.output_layer_size):
-            output_deltas.append(self.calc_error(float(sample[k - self.output_layer_size]), output[k]) * self.d_sig(self.currentInput[-1][k]))
+            output_deltas.append((float(sample[k - self.output_layer_size]) - output[k]) * self.d_sig(self.currentInput[-1][k]))
+            print("Class:" + sample[k - self.output_layer_size] + ", Prediction: " + str(output[k]) + ", Diff: " + str(float(sample[k - self.output_layer_size])-output[k]))
         deltas.append(output_deltas)
 
         # for hidden layer l = L - 1 to 2 do
@@ -109,13 +115,6 @@ class NeuralNetwork:
                 for k in range(len(self.weights[t][j])):
                     self.weights[t][j][k] = self.weights[t][j][k] + learning_rate * float(self.currentOutput[t][j]) * deltas[t][k]
 
-    def sum(self, output, l, k):
-        sum = 0
-        for j in range(len(output)):
-            sum += float(output[j]) * float(self.weights[l][j][k])
-            ##print("sum += " + str (output[j]) + " * " + str(self.weights[l][j][k]))
-        return sum
-
     def sig(self, x):
         return 1 / (1 + math.exp(-x))
 
@@ -124,10 +123,6 @@ class NeuralNetwork:
 
     def delta(self, x):
         return self.d_sig(x)
-
-    def calc_error(self, x, y):
-        print("Class:" + str(x) + ", Prediction: " + str(y) + ", Error: " + str(0.5 * (x - y) * (x - y)))
-        return 0.5 * (x - y) * (x - y)
 
     def evaluate(self, test_data):
         pass
