@@ -1,5 +1,6 @@
 import random
 import math
+import json
 
 class NeuralNetwork:
     def __init__(self, hidden_layers, hidden_layer_size, input_layer_size, output_layer_size):
@@ -8,6 +9,18 @@ class NeuralNetwork:
         self.input_layer_size = input_layer_size
         self.output_layer_size = output_layer_size
         self.initialize_weights(self.hidden_layers, self.hidden_layer_size, self.input_layer_size, self.output_layer_size)
+    
+    def __init__(self, path_to_nn):
+        with open(path_to_nn) as data_file:
+            self.weights = json.load(data_file)
+        self.hidden_layers = len(self.weights) - 1
+        self.hidden_layer_size = len(self.weights[1])
+        self.input_layer_size = len(self.weights[0])
+        self.output_layer_size = len(self.weights[-1][0])
+        print(self.hidden_layers)
+        print(self.hidden_layer_size)
+        print(self.input_layer_size)
+        print(self.output_layer_size)
 
     # creates a list with weights for every transition between two knots
     # Format: [number of transition][number of left knot][number of right knot]
@@ -130,3 +143,7 @@ class NeuralNetwork:
 
     def predict(self, sample):
         return round(self.forward_pass(sample)[0])
+
+    def save_nn(self, path):
+        with open(path + '.json', 'w') as f:
+            json.dump(self.weights, f)
