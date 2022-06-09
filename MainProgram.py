@@ -6,7 +6,7 @@ import csv
 
 def main():
     max_epochs = 1000
-    learning_rate = 0.6
+    learning_rate = 0.01
     hidden_layers = 4
     hidden_layer_size = 4  # includes bias
     input_layer_size = 3  # includes bias
@@ -26,7 +26,7 @@ def main():
     while continue_training:
         nn.train(training_data, max_epochs, learning_rate)
 
-        Plotter.plot_learning_curve(nn.predicted_list, nn.epoch_list)
+        Plotter.plot_learning_curve(nn.epoch_list, nn.loss_list, nn.predicted_list)
         Plotter.plot_map(nn)
 
         answer = input("Continue training? (y/n)\n")

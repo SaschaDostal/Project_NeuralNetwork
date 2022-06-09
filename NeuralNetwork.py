@@ -1,6 +1,7 @@
 import random
 import math
 import json
+import statistics
 
 
 class NeuralNetwork:
@@ -63,19 +64,25 @@ class NeuralNetwork:
 
     def train(self, training_data, epochs, learning_rate):
         self.predicted_list = []    # for graph
-        self.epoch_list = []       # for graph
+        self.loss_list = []         # for graph
+        self.epoch_list = []        # for graph
+        
         for epoch in range(epochs):
             random.shuffle(training_data)
             total = 0
             true = 0
+            self.loss_per_sample = []
             for sample in training_data:
                 output = self.forward_pass(sample)
                 total += 1
                 if round(output[0]) == int(sample[-1]):
                     true += 1
                 self.backward_pass(output, sample, learning_rate)
-            self.predicted_list.append(float(true)/total)    # for graph
-            self.epoch_list.append(epoch)        # for graph
+            
+            self.predicted_list.append(float(true)/total)                   # for graph
+            self.loss_list.append(statistics.mean(self.loss_per_sample))    # for graph
+            self.epoch_list.append(epoch)                                   # for graph
+            
             if epoch == 0 or epoch % 100 == 0:
                 print("Correct Predicted: {:7.4f}".format(
                     float(true)/total) + "%")
@@ -118,6 +125,7 @@ class NeuralNetwork:
         for k in range(self.output_layer_size):
             output_deltas.append((float(
                 sample[k - self.output_layer_size]) - output[k]) * self.d_sig(self.currentInput[-1][k]))
+            self.loss_per_sample.append(abs(float(sample[k - self.output_layer_size])-output[k]))
             #print("Class:" + sample[k - self.output_layer_size] + ", Prediction: " + str(output[k]) + ", Diff: " + str(float(sample[k - self.output_layer_size])-output[k]))
         deltas.append(output_deltas)
 

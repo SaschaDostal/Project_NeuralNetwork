@@ -47,11 +47,13 @@ def plot_map(nn):
     plt.legend()
     plt.show()
 
-def plot_learning_curve(epochs, percentage):
-    plt.plot(percentage, epochs)
-    plt.xlabel('epochs')
-    plt.ylabel('percentage of correct predicted')
-    plt.title('learning curve')
+def plot_learning_curve(epochs, loss, percentage):
+    fig, axs = plt.subplots(2)
+    fig.suptitle('training progress')
+    axs[0].plot(epochs, percentage)
+    axs[0].set(xlabel='epochs', ylabel='percentage of correct predicted')
+    axs[1].plot(epochs, loss)
+    axs[1].set(xlabel='epochs', ylabel='average loss')
     plt.show()
 
 def test(x, y):
