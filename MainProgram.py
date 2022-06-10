@@ -5,14 +5,14 @@ import csv
 
 
 def main():
+    training_data = readCSV('data/testdata_train_3.csv')
+    
     max_epochs = 1000
-    learning_rate = 0.01
+    learning_rate = 0.0001
     hidden_layers = 4
-    hidden_layer_size = 4  # includes bias
-    input_layer_size = 3  # includes bias
+    hidden_layer_size = 5  # includes bias
+    input_layer_size = len(training_data[0])  # includes bias
     output_layer_size = 1
-
-    training_data = readCSV('data/testdata_train_2.csv')
 
     answer = input("Load existing neural network? (y/n)\n")
     if(answer == 'y'):
@@ -27,13 +27,17 @@ def main():
         nn.train(training_data, max_epochs, learning_rate)
 
         Plotter.plot_learning_curve(nn.epoch_list, nn.loss_list, nn.predicted_list)
-        Plotter.plot_map(nn)
+        if input_layer_size == 3:
+            Plotter.plot_map(nn, training_data)
 
         answer = input("Continue training? (y/n)\n")
         if(answer == 'y'):
             answer = input(
                 "Choose new learning rate (currently: " + str(learning_rate) + "): ")
             learning_rate = float(answer)
+            answer = input(
+                "Choose epochs (last time: " + str(max_epochs) + "): ")
+            max_epochs = int(answer)
         else:
             answer = input("Save neural network? (y/n)\n")
             if(answer == 'y'):
