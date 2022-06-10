@@ -6,7 +6,6 @@ import statistics
 
 class NeuralNetwork:
     def __init__(self, path_to_nn=None, hidden_layers=2, hidden_layer_size=3, input_layer_size=3, output_layer_size=1):
-        print(path_to_nn)
         if path_to_nn is None:
             self.hidden_layers = hidden_layers
             self.hidden_layer_size = hidden_layer_size
@@ -84,8 +83,8 @@ class NeuralNetwork:
             self.epoch_list.append(epoch)                                   # for graph
             
             if epoch == 0 or epoch % 100 == 0:
-                print("Correct Predicted: {:7.4f}".format(
-                    float(true)/total) + "%")
+                print("Epoch: " + str(epoch) + ", Correct predicted: {:7.4f}".format(
+                    float(true)/total) + "%,    Average loss: {:7.4f}".format(statistics.mean(self.loss_per_sample)))
 
     def forward_pass(self, sample):
         output = sample[:-1]
