@@ -1,13 +1,21 @@
 import matplotlib.pyplot as plt
 
-def plot_map(nn):
-    
+def plot_map(nn, samples):
+
     # x-axis values
-    a = []
-    c = []
+    a = []  # class 1
+    c = []  # class 2
     # y-axis values
-    b = []
-    d = []
+    b = []  # class 1
+    d = []  # class 2
+
+    for sample in samples:
+        if int(sample[-1]) == 0:
+            a.append(int(sample[0]))
+            b.append(int(sample[1]))
+        else:
+            c.append(int(sample[0]))
+            d.append(int(sample[1]))
 
     precision = 200
 
