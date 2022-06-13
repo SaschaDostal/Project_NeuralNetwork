@@ -67,7 +67,7 @@ class NeuralNetwork:
         self.loss_list = []         # for graph
         self.epoch_list = []        # for graph
         
-        for epoch in range(epochs):
+        for epoch in range(epochs+1):
             random.shuffle(training_data)
             total = 0
             true = 0
@@ -79,7 +79,7 @@ class NeuralNetwork:
                     true += 1
                 self.backward_pass(output, sample, learning_rate)
             
-            self.predicted_list.append(float(true)/total*100)                   # for graph
+            self.predicted_list.append(float(true)/total*100)               # for graph
             self.loss_list.append(statistics.mean(self.loss_per_sample))    # for graph
             self.epoch_list.append(epoch)                                   # for graph
             
@@ -169,10 +169,13 @@ class NeuralNetwork:
         correct = 0
         for sample in test_samples:
             prediction = self.predict(sample)
+            if round(prediction) == int(sample[-1]):
+                correct+=1
             if int(sample[-1]) == 0:
                 pass
             else: # sample[-1] == 1
                 pass
+        print("Correct predicted test samples: " + str(float(correct)/len(test_samples)*100) + "%")
 
 
     def save_nn(self, path):
