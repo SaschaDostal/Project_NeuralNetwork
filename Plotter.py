@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+# plots map of 2-dimensional input
 def plot_map(nn, samples):
 
     # x-axis values
@@ -55,6 +56,7 @@ def plot_map(nn, samples):
     plt.legend()
     plt.show()
 
+# plots learning and loss curve
 def plot_learning_curve(epochs, loss, percentage):
     fig, axs = plt.subplots(2)
     fig.suptitle('training progress')
@@ -63,9 +65,4 @@ def plot_learning_curve(epochs, loss, percentage):
     axs[1].plot(epochs, loss)
     axs[1].set(xlabel='epochs', ylabel='average loss')
     plt.show()
-
-def test(x, y):
-    if x < 7 and y < 7:
-        return 0
-    else:
-        return 1
+    
