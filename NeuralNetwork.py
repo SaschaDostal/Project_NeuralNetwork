@@ -62,7 +62,7 @@ class NeuralNetwork:
 
     # trains the neural network with given training data for the number of epochs 
     # and with the specified learning rate
-    def train(self, training_data, epochs, learning_rate):
+    def train(self, training_data, epochs, learning_rate, batch_size):
         self.predicted_list = []    # for graph
         self.loss_list = []         # for graph
         self.epoch_list = []        # for graph
@@ -72,7 +72,7 @@ class NeuralNetwork:
             total = 0
             true = 0
             self.loss_per_sample = []
-            for sample in training_data:
+            for sample in training_data[0:batch_size]:
                 output = self.forward_pass(sample)
                 total += 1
                 if round(output[0]) == int(sample[-1]):
@@ -84,7 +84,7 @@ class NeuralNetwork:
             self.epoch_list.append(epoch)                                   # for graph
             
             if epoch == 0 or epoch % 100 == 0:
-                print("Epoch: " + str(epoch) + ", Correct predicted: {:6.2f}".format(
+                print("Epoch: " + str(epoch) + ", Correct predicted (training data): {:6.2f}".format(
                     float(true)/total*100) + "%,    Average loss: {:7.4f}".format(statistics.mean(self.loss_per_sample)))
 
     def forward_pass(self, sample):
@@ -162,20 +162,61 @@ class NeuralNetwork:
         return round(self.forward_pass(sample)[0])
 
     def test(self, test_samples):
-        class1_false_positive = 0
-        class1_false_negative = 0
-        class2_false_positive = 0
-        class2_false_negative = 0
+        class1_false_positive = 0 # 0 outcome
+        class1_false_negative = 0 # 0 outcome
+        class1_true_positive = 0 # 0 outcome
+        class1_true_negative = 0 # 0 outcome
+        class2_false_positive = 0 # 1 outcome
+        class2_false_negative = 0 # 1 outcome
+        class2_true_positive = 0 # 1 outcome
+        class2_true_negative = 0 # 1 outcome
         correct = 0
         for sample in test_samples:
             prediction = self.predict(sample)
             if round(prediction) == int(sample[-1]):
                 correct+=1
-            if int(sample[-1]) == 0:
-                pass
-            else: # sample[-1] == 1
-                pass
+            
+            if int(sample[-1]) == 0:        # should be class 1
+                if round(prediction) == 1:  # is class 2
+                    class1_false_negative +=1
+                    class2_false_positive +=1
+                else:                       # is class 1
+                    class1_true_positive +=1
+                    class2_true_negative +=1
+            else: # int(sample[-1]) == 1    should be class 2
+                if round(prediction) == 0:  # is class 1
+                    class2_false_negative +=1
+                    class1_false_positive +=1
+                else:                       # is class 2
+                    class2_true_positive +=1
+                    class1_true_negative +=1
+
         print("Correct predicted test samples: " + str(float(correct)/len(test_samples)*100) + "%")
+        print("Class 1 false positive: " + str(class1_false_positive))
+        print("Class 1 false negative: " + str(class1_false_negative))
+        print("Class 2 false positive: " + str(class2_false_positive))
+        print("Class 2 false negative: " + str(class2_false_negative))
+        
+        try:
+            class1_precision = float(class1_true_positive)/(class1_true_positive + class1_false_positive)
+            class2_precision = float(class2_true_positive)/(class2_true_positive + class2_false_positive)
+            class1_recall = float(class1_true_positive)/(class1_true_positive + class1_false_negative)
+            class2_recall = float(class2_true_positive)/(class2_true_positive + class2_false_negative)
+
+            class1_fvalue = 2*class1_precision*class1_recall/(class1_precision+class1_recall)
+            class2_fvalue = 2*class2_precision*class2_recall/(class2_precision+class2_recall)
+
+            print("Class 1 precision: " + str(class1_precision))
+            print("Class 2 precision: " + str(class2_precision))
+            print("Class 1 recall: " + str(class1_recall))
+            print("Class 2 recall: " + str(class2_recall))
+            print("Class 1 f-value: " + str(class1_fvalue))
+            print("Class 2 f-value: " + str(class2_fvalue))
+        
+        except:
+            print("Calculation not possible.")
+        
+            
 
 
     def save_nn(self, path):
