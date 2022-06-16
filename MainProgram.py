@@ -5,12 +5,14 @@ import csv
 
 
 def main():
-    training_data = readCSV('data/testdata_train_3.csv')
+    training_data = readCSV('data\diabetes_train.csv')
+    test_data = readCSV('data\diabetes_test.csv')
     
     max_epochs = 1000
-    learning_rate = 0.0001
-    hidden_layers = 4
-    hidden_layer_size = 5  # includes bias
+    learning_rate = 0.1
+    batch_size = -1         # -1 is complete batch, >1 mini batch size
+    hidden_layers = 2
+    hidden_layer_size = 10                    # includes bias
     input_layer_size = len(training_data[0])  # includes bias
     output_layer_size = 1
 
@@ -24,8 +26,9 @@ def main():
 
     continue_training = True
     while continue_training:
-        nn.train(training_data, max_epochs, learning_rate)
-
+        nn.train(training_data, max_epochs, learning_rate, batch_size)
+        nn.test(test_data)
+        
         Plotter.plot_learning_curve(nn.epoch_list, nn.loss_list, nn.predicted_list)
         if input_layer_size == 3:
             Plotter.plot_map(nn, training_data)
